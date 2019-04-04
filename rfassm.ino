@@ -16,7 +16,10 @@
 #define DURL "http://www.randombits.se"
 #define DURL_ALT "www.randombits.se"
 #define DMAKER "Random Bits AB"
-#define S_PIR D1
+#define S_PIR D4
+#define LED_Y D5
+#define LED_G D1
+#define LED_R D2
 #define DUMP(str, i, buf, sz) { Serial.println(str); \
                                for(i=0; i<(sz); ++i) { if(buf[i]<0x10) Serial.print('0'); Serial.print(char(buf[i]), HEX); } \
                                Serial.println(); } //Help function for printing the Output
@@ -26,14 +29,16 @@ ESP8266WiFiMulti WiFiMulti;
 aes256_context ctxt;
 int myStatus = 406; // Status OK
 int pirReady = 0;
+int val = 0;
 unsigned long myTime = 0;
 unsigned long oldTime = 0;
 unsigned long updateTime = 0;
 unsigned long pirTime = 0;
+bool stealthMode = 0;
+// Edit settings in rfassm.hkk
 const char* ssid = STASSID;
 const char* password = STAPSK;
 
-int val = 0;
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", 3600, 60000);
 
@@ -113,7 +118,13 @@ void handleNotFound(){
 void setup(void){
   Serial.begin(115200);
   pinMode(S_PIR, INPUT);
+  pinMode(LED_G, OUTPUT);
+  pinMode(LED_Y, OUTPUT);
+  pinMode(LED_R, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_G, HIGH);
+  digitalWrite(LED_Y, HIGH);
+  digitalWrite(LED_R, HIGH);
   WiFi.begin(ssid, password);
   Serial.println("");
   while (WiFi.status() != WL_CONNECTED) {
@@ -121,7 +132,7 @@ void setup(void){
     Serial.print(".");
   }
   configTime(3 * 3600, 0, "pool.ntp.org", "time.nist.gov");
-  
+  digitalWrite(LED_R, LOW);
   Serial.println("");
   Serial.print("Connected to ");
   Serial.println(ssid);
@@ -159,12 +170,17 @@ void setup(void){
   //Serial.println(timeClient.getFormattedTime());
   myTime = timeClient.getEpochTime();
   oldTime = myTime;
-  pirTime = myTime + 50 + random(10,25);
-  Serial.println(myTime);
-  Serial.println(pirTime);
+  pirTime = myTime + 47 + random(10,25);
+  digitalWrite(LED_G, LOW);
 }
 
 void loop(void){
+  if (stealthMode == 1) {
+    digitalWrite(LED_BUILTIN, LOW);
+    digitalWrite(LED_G, LOW);
+    digitalWrite(LED_Y, LOW);
+    digitalWrite(LED_R, LOW);
+  }
   server.handleClient();
   MDNS.update();
   if (myTime > updateTime) {
@@ -173,11 +189,14 @@ void loop(void){
     Serial.println(timeClient.getFormattedTime());
     updateTime = timeClient.getEpochTime() + 378 + random(1,600);
   }
-  Serial.println(pirReady);
-  if (pirReady = 0) {
+  if (pirReady == 0) {
     if(myTime > pirTime) {
       pirReady = 1;
       myStatus = 200;
+      if (stealthMode == 0) {
+        digitalWrite(LED_Y, LOW);
+        digitalWrite(LED_G, HIGH);  
+      }
       Serial.println("PIR sensor ready");
     }
   } else {
@@ -232,8 +251,4 @@ void loop(void){
   }
   */
   myTime = timeClient.getEpochTime();
-  Serial.println(myTime);
-  //Serial.println(myTime);
-  //Serial.println(updateTime);
-  //delay(300);
-}
+ }
