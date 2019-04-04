@@ -16,7 +16,7 @@
 #include "functions.h"
 #define DHTPIN 3
 #define DHTTYPE DHT22  
-DHT_Unified dht(DHTPIN, DHTTYPE);
+
 
 void setup(void){
   Serial.begin(115200);
@@ -147,41 +147,35 @@ void loop(void){
   if (myStatus == 104) {
     Serial.println("Alarm Triggered");
   }
-  /*
-  if (myTime > oldTime) {
-    std::unique_ptr<BearSSL::WiFiClientSecure>client(new BearSSL::WiFiClientSecure);
-  
-    client->setFingerprint(fingerprint);
+  if (useMaster == 1) {
+    if (myTime > oldTime) {
+      std::unique_ptr<BearSSL::WiFiClientSecure>client(new BearSSL::WiFiClientSecure);
+      
+      client->setFingerprint(fingerprint);
 
-    HTTPClient https;
+      HTTPClient https;
 
-    Serial.print("[HTTPS] begin...\n");
-    if (https.begin(*client, "https://jigsaw.w3.org/HTTP/connection.html")) {  // HTTPS
+      Serial.print("[HTTPS] begin...\n");
+      if (https.begin(*client, serverURL)) {  
+        Serial.print("[HTTPS] GET...\n");
+        int httpCode = https.GET();
 
-      Serial.print("[HTTPS] GET...\n");
-      // start connection and send HTTP header
-      int httpCode = https.GET();
-
-      // httpCode will be negative on error
-      if (httpCode > 0) {
-        // HTTP header has been send and Server response header has been handled
-        Serial.printf("[HTTPS] GET... code: %d\n", httpCode);
-
-        // file found at server
-        if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
-          String payload = https.getString();
-          Serial.println(payload);
+        if (httpCode > 0) {
+          Serial.printf("[HTTPS] GET... code: %d\n", httpCode);
+          if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
+            String payload = https.getString();
+            Serial.println(payload);
+          }
+        } else {
+          Serial.printf("[HTTPS] GET... failed, error: %s\n", https.errorToString(httpCode).c_str());
         }
-      } else {
-        Serial.printf("[HTTPS] GET... failed, error: %s\n", https.errorToString(httpCode).c_str());
-      }
 
-      https.end();
-    } else {
-      Serial.printf("[HTTPS] Unable to connect\n");
-    }
-    oldTime = myTime + 600;
+        https.end();
+      } else {
+        Serial.printf("[HTTPS] Unable to connect\n");
+      }
+      oldTime = myTime + 600;
+    }  
   }
-  */
   myTime = timeClient.getEpochTime();
  }
