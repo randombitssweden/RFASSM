@@ -29,3 +29,6 @@ CryptoSigned status
 	the RSA encrypt library function wants data
 	as a unsigned char. Program created string is 
 	signed char. 
+
+
+(C) 2018 Random Bits AB, Peter Roosdorp <peter.roosdorp@randombits.se>
