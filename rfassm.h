@@ -25,6 +25,9 @@ int htmlClientFail = 0;
 int htmlClientFailLog = 0;
 int htmlClientSuccess = 0;
 
+bool tamperAlarm = 0;
+
+unsigned long tamperAlarmTime = 0;
 unsigned long readyTime = 0;
 unsigned long myTime = 0;
 unsigned long clientTime = 0;

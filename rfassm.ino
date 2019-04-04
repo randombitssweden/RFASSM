@@ -101,6 +101,18 @@ void setup(void){
 }
 
 void loop(void){
+  if (tamperAlarm == 1) {
+    Serial.println("[CRITICAL] Tamper Alarm Triggered!");
+    // Add Send https client code FIXME
+    while(0) {
+      digitalWrite(LED_R, HIGH);
+      digitalWrite(LED_Y, HIGH);
+      delay(500);
+      digitalWrite(LED_R, LOW);
+      digitalWrite(LED_Y, LOW);
+      delay(250);
+    }
+  }
   if (stealthMode == 1) {
     digitalWrite(LED_BUILTIN, LOW);
     digitalWrite(LED_G, LOW);
