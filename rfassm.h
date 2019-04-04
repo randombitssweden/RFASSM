@@ -1,6 +1,6 @@
 
 #define DSID "NMCU0000Z"
-#define DVERSION "0.9.1"
+#define DVERSION "0.9.3"
 #define DURL "http://www.randombits.se"
 #define DURL_ALT "www.randombits.se"
 #define DMAKER "Random Bits AB"

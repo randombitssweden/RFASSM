@@ -111,7 +111,7 @@ void loop(void){
   MDNS.update();
   if (myTime > updateTime) {
     timeClient.update();
-    Serial.print("[INFO] NTP update\nTime is now: ");
+    Serial.print("[INFO] NTP update\n[INFO] Time is now: ");
     Serial.println(timeClient.getFormattedTime());
     updateTime = timeClient.getEpochTime() + 378 + random(1,600);
   }

@@ -46,5 +46,10 @@ MQ Sensor
 Stealth Mode
 	In progress, control via https//<device>/stealth/[1|0] 
 
+Ambient Light Sensor
+	Detect changes in ambient light and report light levels.
+
+Tamper Sensor
+	Detect if device case is tampered with. 
 ______________________________________________________________________
 (C) 2018 Random Bits AB, Peter Roosdorp <peter.roosdorp@randombits.se>
