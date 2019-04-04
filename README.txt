@@ -4,6 +4,8 @@ a NodeMCU 1.0 (ESP-12E) on the Arduino IDE.
 
 Version: (See rfassm.h)
 
+*** YOU MUST EDIT config.h BEFORE YOU COMPILE ***
+
 Currently the modules only does the following: 
 
 * Connects to a wifi network
