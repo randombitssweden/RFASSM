@@ -160,6 +160,8 @@ void setup(void){
   myTime = timeClient.getEpochTime();
   oldTime = myTime;
   pirTime = myTime + 50 + random(10,25);
+  Serial.println(myTime);
+  Serial.println(pirTime);
 }
 
 void loop(void){
@@ -169,8 +171,9 @@ void loop(void){
     timeClient.update();
     Serial.print("NTP update\nTime is now: ");
     Serial.println(timeClient.getFormattedTime());
-    updateTime = timeClient.getEpochTime() + 378;
+    updateTime = timeClient.getEpochTime() + 378 + random(1,600);
   }
+  Serial.println(pirReady);
   if (pirReady = 0) {
     if(myTime > pirTime) {
       pirReady = 1;
@@ -229,6 +232,7 @@ void loop(void){
   }
   */
   myTime = timeClient.getEpochTime();
+  Serial.println(myTime);
   //Serial.println(myTime);
   //Serial.println(updateTime);
   //delay(300);
