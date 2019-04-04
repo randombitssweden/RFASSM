@@ -20,24 +20,26 @@
 
 void setup(void){
   Serial.begin(115200);
+  Serial.println("");
   dht.begin();
   sensor_t sensor;
   if (useDHT == 1) {
     dht.temperature().getSensor(&sensor);    
   }
-
-
   pinMode(S_PIR, INPUT);
   pinMode(LED_G, OUTPUT);
   pinMode(LED_Y, OUTPUT);
   pinMode(LED_R, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(ALARM_TRIGGER, INPUT);
+  pinMode(LIGHT_SENSOR, INPUT);
+  pinMode(MQ_SENSOR, INPUT);
   digitalWrite(LED_G, HIGH);
   digitalWrite(LED_Y, HIGH);
   digitalWrite(LED_R, HIGH);
   WiFi.begin(ssid, password);
   Serial.print("Connecting WiFi network: ");
-  Serial.println(ssid);
+  //Serial.println(ssid);
   while (WiFi.status() != WL_CONNECTED) {
     if (ssid == "<SSID>") {
       Serial.println("FATAL ERROR! Please edit config.h before compile");
@@ -61,7 +63,6 @@ void setup(void){
   }
   configTime(3 * 3600, 0, "pool.ntp.org", "time.nist.gov");
   digitalWrite(LED_R, LOW);
-  Serial.println("");
   Serial.print("Connected to ");
   Serial.println(ssid);
   Serial.print("IP address: ");
@@ -98,12 +99,20 @@ void setup(void){
   readyTime = myTime + 47 + random(10,25);
   dhtTime = myTime +5; 
   digitalWrite(LED_G, LOW);
+  Serial.println("----------------------------");
 }
 
 void loop(void){
   if (tamperAlarm == 1) {
     Serial.println("[CRITICAL] Tamper Alarm Triggered!");
-    // Add Send https client code FIXME
+    // Send hail mary to master server
+    std::unique_ptr<BearSSL::WiFiClientSecure>client(new BearSSL::WiFiClientSecure);
+    client->setFingerprint(fingerprint);
+    HTTPClient https;
+    serverURL += DSID;
+    serverURL += "/CRIT/";
+    serverURL += myTime;
+    https.begin(*client, serverURL);
     while(0) {
       digitalWrite(LED_R, HIGH);
       digitalWrite(LED_Y, HIGH);
@@ -152,7 +161,8 @@ void loop(void){
 
           HTTPClient https;
 
-          Serial.println("[HTTPS} client starting.");
+          Serial.print("[HTTPS} client starting at ");
+          Serial.println(timeClient.getFormattedTime());
           digitalWrite(LED_Y, HIGH);
           if (htmlClientFailLog > 0) {
             Serial.printf("[HTTPS] Connection has failed %s times and succeeded %s times.\n", htmlClientFailLog, htmlClientSuccess);

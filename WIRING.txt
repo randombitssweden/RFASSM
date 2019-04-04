@@ -1,0 +1,32 @@
+Parts needed/required (Some optional):
+
+1 x NodeMCU (REQUIRED - Version 1.0 is 100% compatable, others may work with pin number tweaking.)
+3 x 220 Ohm resistors (Used with color LEDs)
+1 x Green LED
+1 x Red LED
+1 x Yellow LED
+2 x Photoelectric LED
+1 x PIR Sensor
+1 x MQ Sensor
+1 x DHT11 or DHT22 sensor
+2 x mercury tilt switch (+ AND gate component)
+1 x Movement trigger
+1 x knock sensor
+
+Pins used: 
+
+3 - DHT 
+D4 - PIR Sensor
+D5 - Yellow LED
+D1 - Green LED
+D2 - Red LED
+D6 - Tamper Trigger
+D7 - Ambient Light Sensor
+A0 - MQ Sensor
+
+Tamper sensor can be built in a number of ways. Most símple version is a photoelectric LED 
+that measures light levels inside device enclosure. (There should be no light inside the
+box if the cover is closed.)
+
+A more advanced version would be using logical OR gate circuts with the different components.
+I.E. Trigger if detected movement OR device internal light level OR knock sensor triggered. 

@@ -2,6 +2,8 @@ This is a base module that was built to be a part of a sensor network.
 This is the framework of that module. It is built and developed for 
 a NodeMCU 1.0 (ESP-12E) on the Arduino IDE.
 
+See WIRING.txt for pinouts and wiring help.
+
 It is referred to as RFASSM
 -Radio Frequency Allround Security Sensor Module
 ______________________________________________________________________
@@ -26,6 +28,7 @@ Constant Green - ALL OK
 Constant Yellow and blinking RED - Wifi connection error
 Constant Yellow - Waiting for warmup
 Constant Green and Yellow - Sending/Recieving Client SSL connection.
+Constant Green and Red - Tamper alarm has been tripped.
 ALL Lights flashing quickly - Edit config.h before compile.
 
 

@@ -9,6 +9,10 @@
 #define LED_Y D5
 #define LED_G D1
 #define LED_R D2
+#define ALARM_TRIGGER D6
+#define LIGHT_SENSOR D7
+#define MQ_SENSOR A0
+
 #define DUMP(str, i, buf, sz) { Serial.println(str); \
                                for(i=0; i<(sz); ++i) { if(buf[i]<0x10) Serial.print('0'); Serial.print(char(buf[i]), HEX); } \
                                Serial.println(); } //Help function for printing the Output
