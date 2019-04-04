@@ -1,3 +1,6 @@
+#include <Adafruit_Sensor.h>
+#include <DHT.h>
+#include <DHT_U.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 #include <aes256.h>
@@ -9,75 +12,21 @@
 #include <WiFiClient.h>
 #include <WiFiClientSecureBearSSL.h>
 #include "rfassm.h"
-
-String myFingerprint() {
-  String p_data; //= DSID;
-  p_data += timeClient.getEpochTime();
-  p_data += "00";
-  p_data += millis();
-  //uint8_t data[p_data.length()] = ;
-  //strcpy(data, p_data);
-  //data.toCharArray(p_data, p_data.length());
-  //  p_data.toCharArray(data, p_data.length());
-  // aes256_encrypt_ecb(&ctxt, p_data);
-  return p_data;
-}
-void handleRoot() {
-  String htmlReply = "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<title>RFASSM:";
-  htmlReply +=DSID;
-  htmlReply +="</title>\n<meta charset=\"UTF-8\">\n<meta name=\"keywords\" content=\"HTML,JavaScript\">\n<meta name=\"author\" content=\"(C) 2018 Random Bits AB\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n</head>\n<body>RFASSM ID: ";
-  htmlReply += DSID;
-  htmlReply += "</br>\nVERSION:";
-  htmlReply +=DVERSION;
-  htmlReply +="</br>\nSTATUS:";
-  htmlReply +=myStatus;
-  htmlReply +=myFingerprint();
-  htmlReply +="</br>\nGMT TIME:";
-  htmlReply +=timeClient.getFormattedTime();
-  htmlReply +="\n</body></html>";
-  server.send(200, "text/html", htmlReply);
-}
-
-void handleAlarm() {
-  String htmlReply = "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<title>RFASSM:";
-  htmlReply +=DSID;
-  htmlReply +="</title>\n<meta charset=\"UTF-8\">\n<meta name=\"keywords\" content=\"HTML,JavaScript\">\n<meta name=\"author\" content=\"(C) 2018 Random Bits AB\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n</head>\n<body>ALARM:";
-  if(myStatus == 200) {
-    htmlReply += "OK";
-  } else if (myStatus == 423) {
-    htmlReply += "LOCKDOWN";
-  } else if (myStatus == 409) {
-    htmlReply += "CONFLICT";
-  } else if (myStatus == 104) {
-    htmlReply += "TRIGGERED";
-  } else {
-    htmlReply += "PROCESSING";
-  }
-  htmlReply +="<hr>";
-  htmlReply +="</br>\n(c) 2018 Random Bits AB - <a href=\"";
-  htmlReply +=DURL;
-  htmlReply +="\">";
-  htmlReply +=DURL_ALT;
-  htmlReply +="\n</body></html>";
-  server.send(200, "text/html", htmlReply);
-}
-void handleNotFound(){
-  String message = "File Not Found\n\n";
-  message += "URI: ";
-  message += server.uri();
-  message += "\nMethod: ";
-  message += (server.method() == HTTP_GET)?"GET":"POST";
-  message += "\nArguments: ";
-  message += server.args();
-  message += "\n";
-  for (uint8_t i=0; i<server.args(); i++){
-    message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
-  }
-  server.send(404, "text/plain", message);
-}
+#include "config.h"
+#include "functions.h"
+#define DHTPIN 3
+#define DHTTYPE DHT22  
+DHT_Unified dht(DHTPIN, DHTTYPE);
 
 void setup(void){
   Serial.begin(115200);
+  dht.begin();
+  sensor_t sensor;
+  if (useDHT == 1) {
+    dht.temperature().getSensor(&sensor);    
+  }
+
+
   pinMode(S_PIR, INPUT);
   pinMode(LED_G, OUTPUT);
   pinMode(LED_Y, OUTPUT);
@@ -86,19 +35,12 @@ void setup(void){
   digitalWrite(LED_G, HIGH);
   digitalWrite(LED_Y, HIGH);
   digitalWrite(LED_R, HIGH);
-  Serial.print("SSID: ");
-/*  if(ssid == "<SSID>") {
-    Serial.println("FATAL ERROR: WiFi SSID not changed from default.");
-    while(0) {
-      delay(5000);
-    }
-  }*/
   WiFi.begin(ssid, password);
   Serial.print("Connecting WiFi network: ");
   Serial.println(ssid);
   while (WiFi.status() != WL_CONNECTED) {
     if (ssid == "<SSID>") {
-      Serial.println("FATAL ERROR! Please edit rfassm.h before compile");
+      Serial.println("FATAL ERROR! Please edit config.h before compile");
       digitalWrite(LED_G, HIGH);
       digitalWrite(LED_Y, HIGH);
       digitalWrite(LED_R, HIGH);
@@ -128,22 +70,24 @@ void setup(void){
   if (MDNS.begin("esp8266")) {
     Serial.println("MDNS responder started");
   }
-
+  Serial.print("Loading: ");
+  Serial.print("AES256 key, ");
   server.setRSACert(new BearSSL::X509List(serverCert), new BearSSL::PrivateKey(serverKey));
-
+  Serial.print("RSA Cert, ");
   server.on("/", handleRoot);
+  server.on("/status/", handleStatus);
+  server.on("/status", handleStatus);
   server.on("/alarm", handleAlarm);
   server.on("/alarm/", handleAlarm);
   server.on("/inline", [](){
     server.send(200, "text/plain", "this works as well");
   });
-
   server.onNotFound(handleNotFound);
-
+  Serial.println("html handlers");
   server.begin();
   Serial.println("HTTPS server started");
   
-  Serial.println("AES256 key loaded.");
+  
   
   timeClient.begin();
   timeClient.update();
@@ -151,8 +95,8 @@ void setup(void){
 
   myTime = timeClient.getEpochTime();
   oldTime = myTime;
-  pirTime = myTime + 47 + random(10,25);
-  
+  readyTime = myTime + 47 + random(10,25);
+  dhtTime = myTime +5; 
   digitalWrite(LED_G, LOW);
 }
 
@@ -171,15 +115,22 @@ void loop(void){
     Serial.println(timeClient.getFormattedTime());
     updateTime = timeClient.getEpochTime() + 378 + random(1,600);
   }
-  if (pirReady == 0) {
-    if(myTime > pirTime) {
-      pirReady = 1;
+  if (useDHT == 1) {
+    if (myTime > dhtTime) {
+      sensors_event_t event;
+      dht.temperature().getEvent(&event);
+      dhtTime = myTime +5;
+    }
+  }
+  if (systemReady == 0) {
+    if(myTime > readyTime) {
+      systemReady = 1;
       myStatus = 200;
       if (stealthMode == 0) {
         digitalWrite(LED_Y, LOW);
         digitalWrite(LED_G, HIGH);  
       }
-      Serial.println("PIR sensor ready");
+      Serial.println("Starting Sensory Data Networking\nRFASSM READY!");
     }
   } else {
     val = digitalRead(S_PIR);

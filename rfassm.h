@@ -1,9 +1,6 @@
-// Change this to your wifi information.
-#define STASSID "<SSID>"
-#define STAPSK  "<WIFI PASSWORD>"
 
 #define DSID "NMCU0000Z"
-#define DVERSION "0.8"
+#define DVERSION "0.9"
 #define DURL "http://www.randombits.se"
 #define DURL_ALT "www.randombits.se"
 #define DMAKER "Random Bits AB"
@@ -28,16 +25,16 @@ aes256_context ctxt;
   };
 
 int myStatus = 406; // Status OK
-int pirReady = 0;
+int systemReady = 0;
 int val = 0;
+int readyTime = 0;
+
 unsigned long myTime = 0;
 unsigned long oldTime = 0;
 unsigned long updateTime = 0;
 unsigned long pirTime = 0;
-bool stealthMode = 0;
-// Edit settings in rfassm.hkk
-const char* ssid = STASSID;
-const char* password = STAPSK;
+unsigned long dhtTime = 0;
+
 
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", 3600, 60000);
