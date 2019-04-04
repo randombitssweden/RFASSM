@@ -30,3 +30,7 @@ box if the cover is closed.)
 
 A more advanced version would be using logical OR gate circuts with the different components.
 I.E. Trigger if detected movement OR device internal light level OR knock sensor triggered. 
+
+____________________________________________________________________________________________________
+(C) 2018 Random Bits AB, Peter Roosdorp <peter.roosdorp@randombits.se>
+
