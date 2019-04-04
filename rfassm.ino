@@ -94,7 +94,7 @@ void setup(void){
   Serial.println("NTP client started");
 
   myTime = timeClient.getEpochTime();
-  oldTime = myTime;
+  clientTime = myTime;
   readyTime = myTime + 47 + random(10,25);
   dhtTime = myTime +5; 
   digitalWrite(LED_G, LOW);
@@ -111,7 +111,7 @@ void loop(void){
   MDNS.update();
   if (myTime > updateTime) {
     timeClient.update();
-    Serial.print("NTP update\nTime is now: ");
+    Serial.print("[INFO] NTP update\nTime is now: ");
     Serial.println(timeClient.getFormattedTime());
     updateTime = timeClient.getEpochTime() + 378 + random(1,600);
   }
@@ -130,7 +130,60 @@ void loop(void){
         digitalWrite(LED_Y, LOW);
         digitalWrite(LED_G, HIGH);  
       }
-      Serial.println("Starting Sensory Data Networking\nRFASSM READY!");
+      Serial.println("[INFO] Starting Sensory Data Networking\n[INFO] RFASSM READY!");
+
+      if (useMaster == 1) {
+        if (myTime > clientTime) {
+          std::unique_ptr<BearSSL::WiFiClientSecure>client(new BearSSL::WiFiClientSecure);
+      
+          client->setFingerprint(fingerprint);
+
+          HTTPClient https;
+
+          Serial.println("[HTTPS} client starting.");
+          digitalWrite(LED_Y, HIGH);
+          if (htmlClientFailLog > 0) {
+            Serial.printf("[HTTPS] Connection has failed %s times and succeeded %s times.\n", htmlClientFailLog, htmlClientSuccess);
+            Serial.printf("[HTTPS] Last successfull connection at UNIX timestamp: %s\n", htmlClientTime);
+            digitalWrite(LED_R, HIGH);
+            delay(200);
+            digitalWrite(LED_R, LOW);
+            delay(100);
+            digitalWrite(LED_R, HIGH);
+            delay(200);
+            digitalWrite(LED_R, LOW);
+          }
+          if (https.begin(*client, serverURL)) {  
+            Serial.println("[HTTPS] Sending request");
+            int httpCode = https.GET();
+
+            if (httpCode > 0) {
+              Serial.printf("[HTTPS] GET: %d\n", httpCode);
+              if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
+                String payload = https.getString();
+                Serial.println("[HTTPS] OK");
+                //Serial.println(payload);
+              }
+            } else {
+              Serial.printf("[HTTPS] GET Failed, error: %s\n", https.errorToString(httpCode).c_str());
+            }
+            digitalWrite(LED_Y, LOW);
+            https.end();
+            clientWait = 1200;
+            htmlClientSuccess++;
+            htmlClientTime = timeClient.getEpochTime();
+          } else {
+            Serial.printf("[HTTPS] Unable to connect\n");
+            htmlClientFail = 1;
+          }
+          if (htmlClientFail == 1) {
+            clientWait = clientWait + 1200;
+            htmlClientFail = 0;
+            htmlClientFailLog++;
+          }
+          clientTime = myTime + clientWait;
+        }  
+      }
     }
   } else {
     val = digitalRead(S_PIR);
@@ -146,36 +199,6 @@ void loop(void){
   }
   if (myStatus == 104) {
     Serial.println("Alarm Triggered");
-  }
-  if (useMaster == 1) {
-    if (myTime > oldTime) {
-      std::unique_ptr<BearSSL::WiFiClientSecure>client(new BearSSL::WiFiClientSecure);
-      
-      client->setFingerprint(fingerprint);
-
-      HTTPClient https;
-
-      Serial.print("[HTTPS] begin...\n");
-      if (https.begin(*client, serverURL)) {  
-        Serial.print("[HTTPS] GET...\n");
-        int httpCode = https.GET();
-
-        if (httpCode > 0) {
-          Serial.printf("[HTTPS] GET... code: %d\n", httpCode);
-          if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
-            String payload = https.getString();
-            Serial.println(payload);
-          }
-        } else {
-          Serial.printf("[HTTPS] GET... failed, error: %s\n", https.errorToString(httpCode).c_str());
-        }
-
-        https.end();
-      } else {
-        Serial.printf("[HTTPS] Unable to connect\n");
-      }
-      oldTime = myTime + 600;
-    }  
   }
   myTime = timeClient.getEpochTime();
  }
