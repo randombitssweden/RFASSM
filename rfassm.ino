@@ -1,6 +1,5 @@
 #include <NTPClient.h>
 #include <WiFiUdp.h>
-
 #include <aes256.h>
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WebServerSecure.h>
@@ -11,44 +10,6 @@
 #include <WiFiClientSecureBearSSL.h>
 #include "rfassm.h"
 
-#define DSID "NMCU0000Z"
-#define DVERSION "0.1"
-#define DURL "http://www.randombits.se"
-#define DURL_ALT "www.randombits.se"
-#define DMAKER "Random Bits AB"
-#define S_PIR D4
-#define LED_Y D5
-#define LED_G D1
-#define LED_R D2
-#define DUMP(str, i, buf, sz) { Serial.println(str); \
-                               for(i=0; i<(sz); ++i) { if(buf[i]<0x10) Serial.print('0'); Serial.print(char(buf[i]), HEX); } \
-                               Serial.println(); } //Help function for printing the Output
-
-ESP8266WiFiMulti WiFiMulti;
-
-aes256_context ctxt;
-int myStatus = 406; // Status OK
-int pirReady = 0;
-int val = 0;
-unsigned long myTime = 0;
-unsigned long oldTime = 0;
-unsigned long updateTime = 0;
-unsigned long pirTime = 0;
-bool stealthMode = 0;
-// Edit settings in rfassm.hkk
-const char* ssid = STASSID;
-const char* password = STAPSK;
-
-WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", 3600, 60000);
-
-// Server ssl cert fingerprint
-const uint8_t fingerprint[20] = {0x5A, 0xCF, 0xFE, 0xF0, 0xF1, 0xA6, 0xF4, 0x5F, 0xD2, 0x11, 0x11, 0xC6, 0x1D, 0x2F, 0x0E, 0xBC, 0x39, 0x8D, 0x50, 0xE0};
-
-BearSSL::ESP8266WebServerSecure server(443);
-
-
-const int led = 13;
 String myFingerprint() {
   String p_data; //= DSID;
   p_data += timeClient.getEpochTime();
@@ -125,11 +86,36 @@ void setup(void){
   digitalWrite(LED_G, HIGH);
   digitalWrite(LED_Y, HIGH);
   digitalWrite(LED_R, HIGH);
+  Serial.print("SSID: ");
+/*  if(ssid == "<SSID>") {
+    Serial.println("FATAL ERROR: WiFi SSID not changed from default.");
+    while(0) {
+      delay(5000);
+    }
+  }*/
   WiFi.begin(ssid, password);
-  Serial.println("");
+  Serial.print("Connecting WiFi network: ");
+  Serial.println(ssid);
   while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
+    if (ssid == "<SSID>") {
+      Serial.println("FATAL ERROR! Please edit rfassm.h before compile");
+      digitalWrite(LED_G, HIGH);
+      digitalWrite(LED_Y, HIGH);
+      digitalWrite(LED_R, HIGH);
+      delay(400);
+      digitalWrite(LED_G, LOW);
+      digitalWrite(LED_Y, LOW);
+      digitalWrite(LED_R, LOW);
+      delay(400);
+    } else {
+      digitalWrite(LED_G, LOW);
+      digitalWrite(LED_R, LOW);
+      //digitalWrite(LED_Y, LOW);
+      delay(400);
+      digitalWrite(LED_Y, HIGH);
+      digitalWrite(LED_R, HIGH);
+      delay(600);
+    }
   }
   configTime(3 * 3600, 0, "pool.ntp.org", "time.nist.gov");
   digitalWrite(LED_R, LOW);
@@ -156,21 +142,17 @@ void setup(void){
 
   server.begin();
   Serial.println("HTTPS server started");
-  uint8_t key[] = { //
-    0x60, 0x67, 0x36, 0x30, 0x47, 0x7b, 0x26, 0x6c, 
-    0x40, 0x6d, 0x4f, 0x4a, 0x2c, 0x43, 0x28, 0x24, 
-    0x2e, 0x55, 0x23, 0x70, 0x26, 0x5e, 0x78, 0x4c, 
-    0x5a, 0x3b, 0x42, 0x36, 0x23, 0x49
-  };
+  
   Serial.println("AES256 key loaded.");
+  
   timeClient.begin();
   timeClient.update();
   Serial.println("NTP client started");
-  //Serial.print("Current time: ");
-  //Serial.println(timeClient.getFormattedTime());
+
   myTime = timeClient.getEpochTime();
   oldTime = myTime;
   pirTime = myTime + 47 + random(10,25);
+  
   digitalWrite(LED_G, LOW);
 }
 
