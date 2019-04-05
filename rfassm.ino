@@ -14,9 +14,6 @@
 #include "rfassm.h"
 #include "config.h"
 #include "functions.h"
-#define DHTPIN 3
-#define DHTTYPE DHT22  
-
 
 void setup(void){
   Serial.begin(115200);
@@ -99,6 +96,7 @@ void setup(void){
   readyTime = myTime + 47 + random(10,25);
   dhtTime = myTime +5; 
   digitalWrite(LED_G, LOW);
+  Serial.printf("HTTPS Client refresh time set to %s seconds.", clientWait);
   Serial.println("----------------------------");
 }
 
