@@ -18,30 +18,11 @@
                                Serial.println(); } //Help function for printing the Output
 
 
-ESP8266WiFiMulti WiFiMulti;
 
 aes256_context ctxt;
 
-int myStatus = 406; // Status OK
-int val = 0;
-int clientWait = 1200;
-int htmlClientFail = 0;
-int htmlClientFailLog = 0;
-int htmlClientSuccess = 0;
 
-bool tamperAlarm = 0;
-
-unsigned long tamperAlarmTime = 0;
-unsigned long readyTime = 0;
-unsigned long myTime = 0;
-unsigned long clientTime = 0;
-unsigned long updateTime = 0;
-unsigned long systemReady = 0;
-unsigned long dhtTime = 0;
-unsigned long htmlClientTime = 0;
-
-WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", 3600, 60000);
+//NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", 3600, 60000);
 
 
 BearSSL::ESP8266WebServerSecure server(443);

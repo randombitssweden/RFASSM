@@ -19,7 +19,7 @@ void handleRoot() {
   htmlReply += "</br>\nVERSION:";
   htmlReply +=DVERSION;
   htmlReply +="</br>\nSTATUS:";
-  htmlReply +=myStatus;
+//  htmlReply +=myStatus;
   htmlReply +=myFingerprint();
   htmlReply +="</br>\nGMT TIME:";
   htmlReply +=timeClient.getFormattedTime();
@@ -31,7 +31,7 @@ void handleAlarm() {
   String htmlReply = "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<title>RFASSM:";
   htmlReply +=DSID;
   htmlReply +="</title>\n<meta charset=\"UTF-8\">\n<meta name=\"keywords\" content=\"HTML,JavaScript\">\n<meta name=\"author\" content=\"(C) 2018 Random Bits AB\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n</head>\n<body>ALARM:";
-  if(myStatus == 200) {
+/*  if(myStatus == 200) {
     htmlReply += "OK";
   } else if (myStatus == 423) {
     htmlReply += "LOCKDOWN";
@@ -41,7 +41,7 @@ void handleAlarm() {
     htmlReply += "TRIGGERED";
   } else {
     htmlReply += "PROCESSING";
-  }
+  }*/
   htmlReply +="<hr>";
   htmlReply +="</br>\n(c) 2018 Random Bits AB - <a href=\"";
   htmlReply +=DURL;
@@ -76,7 +76,6 @@ void handleStatus(){
       // DO DHT STUFF - FIXME
     }
     htmlReply +="</br>\nSTATUS:";
-    htmlReply +=myStatus;
     htmlReply +=myFingerprint();
     htmlReply +="</br>\nGMT TIME:";
     htmlReply +=timeClient.getFormattedTime();
