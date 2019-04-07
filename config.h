@@ -1,13 +1,1 @@
-bool firstRun = 1;
-bool usePIR = 1;
-bool useMQ = 1;
-bool useDHT = 1;
-bool useMaster = 1;
-bool useStealth = 0;
-bool htmlClientFail = 0;
-bool tamperAlarm = 0;
-bool useLockdown = 0;
-bool useLPD = 0;
-bool useGSM = 0;
-bool useBlueTooth = 0;
-bool useDebug = 1;
+

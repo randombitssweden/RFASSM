@@ -21,6 +21,21 @@
 
 
 void setup() {
+  uint8_t myID[16];
+  bool firstRun;
+bool usePIR;
+bool useMQ;
+bool useDHT;
+bool useMaster;
+bool useStealth;
+bool htmlClientFail = 0;
+bool tamperAlarm;
+bool useLockdown;
+bool useLPD;
+bool useGSM;
+bool useBlueTooth;
+bool useDebug;
+
   int e_addr = 0;
   char masterURL[256];
   char serverCert[1024];
@@ -31,7 +46,9 @@ void setup() {
 
   char wifissid[8];
   char wifipass[16];
-  
+
+  String maker;
+
   int tempVal = 0;
   int htmlClientFailLog = 0;
   int myStatus = 0;
@@ -47,93 +64,69 @@ void setup() {
 
   if (!useLockdown) {
     Serial.begin(115200);
-      while(!Serial) {
+    while (!Serial) {
       // FIXME Error blink
     }
   }
-  
+
   EEPROM.begin(512);
-  firstRun = EEPROM.read(0);
-  usePIR = EEPROM.read(1);
-  useMQ = EEPROM.read(2);
-  useDHT = EEPROM.read(3);
-  useMaster = EEPROM.read(4);
-  useStealth = EEPROM.read(5);
-  htmlClientFail = EEPROM.read(6);
-  tamperAlarm = EEPROM.read(7);
-  useLockdown = EEPROM.read(8);
-  useLPD = EEPROM.read(9);
-  useGSM = EEPROM.read(10);
-  useBlueTooth = EEPROM.read(11);
-  for (int i = 13 ; i < 21 ; i++) {
-    if (EEPROM.read(i) == NULL) {
-      break;
-    }
-    systemAdmin[i-13] = EEPROM.read(i);
+  EEPROM.get(e_addr, myID);
+  e_addr += sizeof(myID);
+  EEPROM.get(e_addr, maker);
+  e_addr += sizeof(maker);
+  EEPROM.get(e_addr, firstRun);
+  e_addr += sizeof(firstRun);
+  EEPROM.get(e_addr, usePIR);
+  e_addr += sizeof(usePIR);
+  EEPROM.get(e_addr, useMQ);
+  e_addr += sizeof(useMQ);
+  EEPROM.get(e_addr, useDHT);
+  e_addr += sizeof(useDHT);
+  EEPROM.get(e_addr, useMaster);
+  e_addr += sizeof(useMaster);
+  EEPROM.get(e_addr, useStealth);
+  e_addr += sizeof(useStealth);
+  EEPROM.get(e_addr, tamperAlarm);
+  e_addr += sizeof(tamperAlarm);
+  EEPROM.get(e_addr, useLockdown);
+  e_addr += sizeof(useLockdown);
+  EEPROM.get(e_addr, useLPD);
+  e_addr += sizeof(useLPD);
+  EEPROM.get(e_addr, useGSM);
+  e_addr += sizeof(useGSM);
+  EEPROM.get(e_addr, useBlueTooth);
+  e_addr += sizeof(useBlueTooth);
+  EEPROM.get(e_addr, useDebug);
+  e_addr += sizeof(useDebug);
+  EEPROM.get(e_addr, wifissid);
+  e_addr += sizeof(wifissid);
+  EEPROM.get(e_addr, wifipass);
+  e_addr += sizeof(wifipass);
+  EEPROM.get(e_addr, serverURL);
+  e_addr += sizeof(serverURL);
+  EEPROM.get(e_addr, aes_pass);
+  e_addr += sizeof(aes_pass);
+  EEPROM.get(e_addr, fingerprint);
+  e_addr += sizeof(fingerprint);
+  EEPROM.end();
+  if (useBlueTooth == 1) {
+    // FIXME Bluetooth module
   }
-  for (int i = 21 ; i < 37 ; i++) {
-    if (EEPROM.read(i) == NULL) {
-      break;
-    }
-    systemPass[i-21] = EEPROM.read(i);
+  if (useMaster) {
   }
-  for (int i = 37 ; i < 45 ; i++) {
-    if (EEPROM.read(i) == NULL) {
-      break;
-    }
-    wifissid[i-37] = EEPROM.read(i);
+  if (usePIR) {
   }
-  for (int i = 45; i < 57 ; i++) {
-    if (EEPROM.read(i) == NULL) {
-      break;
-    }
-    wifipass[i -45] = EEPROM.read(i);
+  if (useDHT) {
   }
-Serial.printf("[DEBUG] firstRun = %s", firstRun);
-Serial.printf("[DEBUG] usePIR = %s", usePIR);
-Serial.printf("[DEBUG] useMQ = %s", useMQ);
-Serial.printf("[DEBUG] useDHT = %s", useDHT);
-Serial.printf("[DEBUG] useMaster = %s", useMaster);
-Serial.printf("[DEBUG] useStealth = %s", useStealth);
-Serial.printf("[DEBUG] htmlClientFail = %s", htmlClientFail);
-Serial.printf("[DEBUG] tamperAlarm = %s", tamperAlarm);
-Serial.printf("[DEBUG] useLockdown = %s", useLockdown);
-Serial.printf("[DEBUG] useLPD = %s", useLPD);
-Serial.printf("[DEBUG] useGSM = %s", useGSM);
-Serial.printf("[DEBUG] useBlueTooth = %s", useBlueTooth);
-Serial.printf("[DEBUG] useDebug = %s", useDebug);
-
-  /*
- 
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(wifissid, wifipass);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
+  if (useStealth) {
   }
-
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());*/
-if (useBlueTooth == 1) {
-  // FIXME Bluetooth module
-}
-if (useMaster) {
-}
-if (usePIR) {
-}
-if (useDHT) {
-}
-if (useStealth) {
-}
-if (useLPD) {
-}
-if (useGSM){
-}
+  if (useLPD) {
+  }
+  if (useGSM) {
+  }
 }
 
 void loop() {
 
-  
+
 }
