@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="description" content="RFASSM device information" />
+<meta name="keywords" content="HTML,CSS,XML,JavaScript" />
+<meta name="author" content="Random Bits AB" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RFASSM Webpage</title>
+</head>
+<body>
+<h2><img src="icon.png" alt="Icon" width=50 height=50 border=0 align=center />RFASSM Setup</h2>
+<hl />
+<form id="setup"><table><tbody>
+<tr><td>RFASSM Version: </td><td>$VERSION</td></tr>
+<tr><td>System Admin User: </td><td><input type="text" form="setup" name="SYSUSER" value="$SYSUSER"></td></tr>
+<tr><td>System User Password: </td><td><input type="password" form="setup" name="SYSPASSWORD"></td><td><font size=-2><b><i>Not changed if left empty</i></b></font></td></tr>
+<tr><td>WiFi Network Name: </td><td><input type="text" form="setup" name="WIFISSID" value="$WIFISSID"></td></tr>
+<tr><td>WiFi Network Password: </td><td><input type="password" form="setup" name="WIFIPASS"></td></tr>
+<tr><td>AES Password: </td><td><input type="password" form="setup" name="AESPASS"><td><font size=-2><b><i>Not changed if left empty</i></b></font></td></tr>
+<tr><td>Use Master Server: </td><td><select name="USEMASTER" form="setup"><option value="y">Yes</option><option value="n">No</option></select></td></tr>
+<tr><td>Master Server Host or IP: </td><td><input type="text" form="setup" name="MASTERURL" value="$MASTERURL"></td></tr>
+<tr><td>Master Server SSL Fingerprint: </td><td><input type="text" form="setup" name="FINGERPRINT" value="$FINGERPRINT"></td></tr>
+<tr><td>Server SSL Certificate: </td><td><input type="textarea" form="setup" name="SERVSSL" value="$SERVSSL"></td></tr>
+<tr><td>Server SSL Key: </td><td><input type="textarea" form="setup" name="SERVSSL"></td><td><font size=-2><b><i>Not changed if left empty</i></b></font></td></tr>
+<tr><td></td><td><button type="submit">Save</button></td></tr>
+</tbody></table></form>
+</body>
+</html>
