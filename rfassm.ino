@@ -3,9 +3,12 @@
 #include <WiFiClient.h>
 #include <ESP8266WebServerSecure.h>
 #include <ESP8266mDNS.h>
-
+#include <EasyDDNS.h>
+#include <WiFiUdp.h>
+#include <TinyUPnP.h>
 
 BearSSL::ESP8266WebServerSecure server(443);
+TinyUPnP tinyUPnP(20000);
 
 void handleRootFirstUse() {
 
@@ -31,27 +34,31 @@ void handleNotFound() {
 }
 void setup() {
   Serial.begin(74880);
-  float firmwareVersion;
-  bool firstRun;
+  int addr = 0;
+
+  float firmwareVersion = EEPROM.get(addr, firmwareVersion);
+  addr += sizeof(firmwareVersion);  
+  bool firstRun = EEPROM.get(addr, firstRun);
+  addr += sizeof(firstRun);
   char sysUser[8];
+  EEPROM.get(addr, sysUser);
+  addr += sizeof(sysUser);
   char sysPass[256];
   char w_ssid[64];
   char w_passwd[256];
   char aesPass[256];
-  String serverCert;
-  String serverCertKey;
-  int addr = 0;
+  char serverCert;
+  char serverCertKey;
   Serial.println("BOOTING...\nReading Memory");
   String w_softAP = "RFASSM-";
   w_softAP += ESP.getFlashChipId();
   String myName = "RFASSM";
   myName += ESP.getFlashChipId();
-  EEPROM.get(addr, firmwareVersion);
-  addr += sizeof(firmwareVersion);
-  EEPROM.get(addr, firstRun);
-  addr += sizeof(firstRun);
-  EEPROM.get(addr, sysUser);
-  addr += sizeof(sysUser);
+  
+
+  
+  
+  
   EEPROM.get(addr, sysPass);
   addr += sizeof(sysPass);
   EEPROM.get(addr, w_ssid);
@@ -63,6 +70,8 @@ void setup() {
   EEPROM.get(addr, serverCert);
   addr += sizeof(serverCert);
   EEPROM.get(addr, serverCertKey);
+  bool useDDNS;
+  
   if (!firstRun) {
     WiFi.mode(WIFI_STA);
     WiFi.begin(w_ssid, w_passwd);
@@ -132,6 +141,26 @@ z2wuIbxQ6qc6cFInjvr+4arrUPJ+6xoUFXE34W8UxLPTh/b+qpGYKMM=
 server.setRSACert(new BearSSL::X509List(genCert), new BearSSL::PrivateKey(genCertKey));
   
   configTime(3 * 3600, 0, "pool.ntp.org", "time.nist.gov");
+
+if(useDDNS) {
+  EasyDDNS.service("dyndns");    // Enter your DDNS Service Name - "duckdns" / "noip" / "dyndns" / "dynu"
+EasyDDNS.client("hostname","username","client-key");    // Enter ddns Hostname - Username - Client-key
+}
+/*
+boolean portMappingAdded = false;
+  tinyUPnP.addPortMappingConfig(WiFi.localIP(), 443, RULE_PROTOCOL_TCP, 36000, myName);
+  while (!portMappingAdded) {
+    portMappingAdded = tinyUPnP.commitPortMappings();
+    Serial.println("");
+  
+    if (!portMappingAdded) {
+      // for debugging, you can see this in your router too under forwarding or UPnP
+      tinyUPnP.printAllPortMappings();
+      Serial.println(F("This was printed because adding the required port mapping failed"));
+      delay(30000);  // 30 seconds before trying again
+    }
+  }
+*/
   
   if (firstRun) {
     server.on("/", handleRootFirstUse);
