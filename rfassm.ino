@@ -74,9 +74,9 @@ void setup() {
     }
   } else {
     WiFi.softAP(w_softAP);
-   // Serial.printf("First time boot. Settings not found.\nStarting WiFi AP\nPlease connect to %s and visit https://%i/setup.html\n", w_softAP, WiFi.localIP());
+    // Serial.printf("First time boot. Settings not found.\nStarting WiFi AP\nPlease connect to %s and visit https://%i/setup.html\n", w_softAP, WiFi.localIP());
   }
-    static const char genCert[] PROGMEM = R"EOF(
+  static const char genCert[] PROGMEM = R"EOF(
 -----BEGIN CERTIFICATE-----
 MIIDhDCCAmygAwIBAgIQC3hHjTFCetg8KQyOb8Dy9zANBgkqhkiG9w0BAQsFADAm
 MSQwIgYDVQQDDBtSYW5kb20gQml0cyBBQiBSb290IFRlc3QgQ0EwHhcNMTkwNDA5
