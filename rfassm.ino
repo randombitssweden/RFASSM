@@ -11,11 +11,11 @@ BearSSL::ESP8266WebServerSecure server(443);
 TinyUPnP tinyUPnP(20000);
 
 void handleRootFirstUse() {
-
+  server.send(200, "text/plain", "setup index.html");
 }
 
 void handleRoot() {
-
+  server.send(200, "text/plain", "static index.html");
 }
 
 void handleNotFound() {
@@ -35,6 +35,7 @@ void handleNotFound() {
 void setup() {
   Serial.begin(74880);
   int addr = 0;
+
   float firmwareVersion = EEPROM.get(addr, firmwareVersion);
   addr += sizeof(firmwareVersion);  
   bool firstRun = EEPROM.get(addr, firstRun);
@@ -45,6 +46,8 @@ void setup() {
   char sysPass[256];
   char w_ssid[64];
   char w_passwd[256];
+  bool useMaster;
+  char masterURL[128];
   char aesPass[256];
   char serverCert;
   char serverCertKey;
@@ -53,11 +56,6 @@ void setup() {
   w_softAP += ESP.getFlashChipId();
   String myName = "RFASSM";
   myName += ESP.getFlashChipId();
-  
-
-  
-  
-  
   EEPROM.get(addr, sysPass);
   addr += sizeof(sysPass);
   EEPROM.get(addr, w_ssid);
@@ -70,6 +68,18 @@ void setup() {
   addr += sizeof(serverCert);
   EEPROM.get(addr, serverCertKey);
   bool useDDNS;
+  addr += sizeof(serverCertKey);
+  EEPROM.get(addr, useDDNS);
+  addr += sizeof(useDDNS);
+  char ddnsUser[32];
+  EEPROM.get(addr, ddnsUser);
+  addr += sizeof(ddnsUser);
+  char ddnsPass[32];
+  EEPROM.get(addr, ddnsPass);
+  addr += sizeof(ddnsPass);
+  char ddnsHost[128];
+  EEPROM.get(addr, ddnsHost);
+  addr += sizeof(ddnsHost);
   
   if (!firstRun) {
     WiFi.mode(WIFI_STA);
