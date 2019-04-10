@@ -35,7 +35,6 @@ void handleNotFound() {
 void setup() {
   Serial.begin(74880);
   int addr = 0;
-
   float firmwareVersion = EEPROM.get(addr, firmwareVersion);
   addr += sizeof(firmwareVersion);  
   bool firstRun = EEPROM.get(addr, firstRun);
