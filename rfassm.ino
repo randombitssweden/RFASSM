@@ -10,7 +10,7 @@
 BearSSL::ESP8266WebServerSecure server(443);
 TinyUPnP tinyUPnP(20000);
 
-void handleRootFirstUse() {
+void handleSetup() {
   server.send(200, "text/plain", "setup index.html");
 }
 
@@ -80,8 +80,8 @@ void setup() {
   char ddnsHost[128];
   EEPROM.get(addr, ddnsHost);
   addr += sizeof(ddnsHost);
-  
-  if (!firstRun) {
+  Serial.println("Settings loaded");
+  if (firstRun) {
     WiFi.mode(WIFI_STA);
     WiFi.begin(w_ssid, w_passwd);
     Serial.print("Connecting to wifi network ");
@@ -92,7 +92,12 @@ void setup() {
     }
   } else {
     WiFi.softAP(w_softAP);
-    // Serial.printf("First time boot. Settings not found.\nStarting WiFi AP\nPlease connect to %s and visit https://%i/setup.html\n", w_softAP, WiFi.localIP());
+    WiFi.begin();
+    Serial.print("First time boot. Settings not found.\nStarting WiFi AP\nPlease connect to ");
+    Serial.print(w_softAP);
+    Serial.print(" and visit https://");
+    Serial.print(WiFi.localIP());
+    Serial.print("/setup.html\n");
   }
   static const char genCert[] PROGMEM = R"EOF(
 -----BEGIN CERTIFICATE-----
@@ -157,13 +162,14 @@ EasyDDNS.client("hostname","username","client-key");    // Enter ddns Hostname -
 }
 /*
 boolean portMappingAdded = false;
+int portMapTimeOut = 5
   tinyUPnP.addPortMappingConfig(WiFi.localIP(), 443, RULE_PROTOCOL_TCP, 36000, myName);
   while (!portMappingAdded) {
     portMappingAdded = tinyUPnP.commitPortMappings();
     Serial.println("");
   
-    if (!portMappingAdded) {
-      // for debugging, you can see this in your router too under forwarding or UPnP
+    if (!portMappingAdded && portMapTimeOut > 0) {
+      portMapTimeOut--;
       tinyUPnP.printAllPortMappings();
       Serial.println(F("This was printed because adding the required port mapping failed"));
       delay(30000);  // 30 seconds before trying again
@@ -172,10 +178,12 @@ boolean portMappingAdded = false;
 */
   
   if (firstRun) {
-    server.on("/", handleRootFirstUse);
+    server.on("/", handleSetup);
   } else {
     server.on("/", handleRoot);
   }
+  server.on("/index.html", handleRoot);
+  server.on("/admin.html", handleSetup);
   server.onNotFound(handleNotFound);
   server.begin();
   MDNS.begin(myName);
