@@ -1,5 +1,7 @@
 **** CURRENTLY BROKEN. NOT WORKING. Rebuild in progress. *****
 
+**** Last working version is 0.9 **** 
+
 This is a base module that was built to be a part of a sensor network. 
 This is the framework of that module. It is built and developed for 
 a NodeMCU 1.0 (ESP-12E) on the Arduino IDE.
